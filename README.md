@@ -16,24 +16,35 @@ Our problem is Music Source Seperation, the decomposition of polyphonic audio in
 
 We will be implementing the algorithm described by Derry FitzGerald in his paper "Harmonic/Percussive Seperation using Median Filtering" [1]. A non-deep learning, deterministic appraoch to source seperation. The result will be visualized in a GUI impleneted in Rust using custom widgets and **egui** [5]. The extensive monomorphization of generic code and "const generics" performed by the `rustc` compiler allows for extremely high-performance code generation, while preserving compile-time guarantees of memory safety [6].
 
+## Related Work
+
+While recent research in music source separation has focused on deep learning approaches [10], meaningful results have been demonstrated without using deep learning.
+
+The basis for the our chosen approach to source separation is described by Onu et al. [9]. In a spectrogram, harmonic components tend to be "short and long" while percussive components are "tall and narrow". The vertical and horizontal components are separated using complementary diffusion. While effective, this approach is not efficient enough to support real-time source separation.
+
+The "median filtering" approach to source separation as described by FitzGerald shares the unique feature of not requiring a pretrained model, while also being significantly less computationally expensive. This allows the approach to be used in real-time applications [1].
 
 ## The Algorithm  
 Let $f$ be the frequency and $t$ time.  
 1. Given an input audio signal apply **Short Time Fourier Transform** (STFT) to get $S(f,t)$, the magnitude of a frequence $f$ at time $t$.  
 2. Define the **median filter** as 
+
 ```math
 y(n) = \text{median} \{ x(n - k : x + k): k = (l-2)/2\}
 ```
 For some $x(n)$, an array, and $l$, a filter size.  
+
 3.  Let $P(t,f)$ be the median filter of $S(\cdot, f)$  
 4.  Let $H(t,f)$ be the median filter of $S(t, \cdot)$  
 5. Define our **binary filters** [1] as  
+
 ```math
     M_H (t, f) = \begin{cases}
         1,& H(t, f) > P(t,f)\\
         0,& \text{otherwise}
     \end{cases}\\
 ```
+
 ```math
     M_P (t, f) = \begin{cases}
         1,& P(t, f) > H(t,f)\\
@@ -127,3 +138,6 @@ Objective 2: Target WebAssembly and deploy the application as a public website
 
 [8] P. Stone, et al., "num-traits: Numeric traits for Rust," 2024. [Online]. Available: [https://github.com/rust-num/num-traits](https://github.com/rust-num/num-traits)
 
+[9] N. Ono, K. Miyamoto, J. Le Roux, H. Kameoka, and S. Sagayama, “Separation of a monaural audio signal into harmonic/percussive components by complemen- tary diffusion on spectrogram,” in 2008 16th European Signal Processing Conference, 2008, pp. 1–4.
+
+[10] S. Araki, N. Ito, R. Haeb-Umbach, G. Wichern, Z.-Q. Wang, and Y. Mitsufuji, “30+ years of source separa- tion research: Achievements and future challenges,” in ICASSP 2025 - 2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2025, pp. 1–5.
