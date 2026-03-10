@@ -8,13 +8,34 @@ Rust is used for the algorithm and GUI.
 
 ## Getting Started
 
-Once project is finished describe how to run it. Include some pictures here as well.
+The WASM/Native interoperability is based on the implementation in [eframe_template](https://github.com/emilk/eframe_template/).
+
+To run the native application:
+
+```bash
+cargo run
+```
+
+To run the web application, install trunk:
+
+```bash
+cargo install --locked trunk
+```
+
+Then run the application in development mode:
+
+```bash
+trunk serve
+```
+
+<!-- Once project is finished describe how to run it. Include some pictures here as well. -->
 
 ## Introduction
 
 Our problem is Music Source Seperation, the decomposition of polyphonic audio into it's individual components. MSS has been used effectively in a variety of disciplines, such as manatee population estimation [2], cardiac feature monitoring [3], and bird sound labelling [4]. It has applications in music production and vocal removal for karaoke.
 
 We will be implementing the algorithm described by Derry FitzGerald in his paper "Harmonic/Percussive Seperation using Median Filtering" [1]. A non-deep learning, deterministic appraoch to source seperation. The result will be visualized in a GUI impleneted in Rust using custom widgets and **egui** [5]. The extensive monomorphization of generic code and "const generics" performed by the `rustc` compiler allows for extremely high-performance code generation, while preserving compile-time guarantees of memory safety [6].
+
 
 ## Related Work
 
