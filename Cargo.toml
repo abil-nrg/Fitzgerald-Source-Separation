@@ -7,13 +7,17 @@ edition = "2024"
 eframe = { version = "0.33.3", features = ["default_fonts"] }
 egui = "0.33.3"
 log = "0.4.29"
+rfd = "0.17.2"
+symphonia = { version = "0.5.5", features = ["all"] }
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 env_logger = "0.11.8"
+poll-promise = { version = "0.3.0", features = ["smol", "smol_tick_poll"] }
 
 # web:
 [target.'cfg(target_arch = "wasm32")'.dependencies]
+poll-promise = { version = "0.3.0", features = ["web"] }
 wasm-bindgen-futures = "0.4.50"
 web-sys = "0.3.70"
 

@@ -11,9 +11,9 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "eframe template",
+        "Source Separation",
         native_options,
-        Box::new(|cc| Ok(Box::new(app::TemplateApp::new(cc)))),
+        Box::new(|cc| Ok(Box::new(app::SeparationApp::new(cc)))),
     )
 }
 
@@ -41,7 +41,7 @@ fn main() {
             .start(
                 canvas,
                 web_options,
-                Box::new(|cc| Ok(Box::new(app::TemplateApp::new(cc)))),
+                Box::new(|cc| Ok(Box::new(app::SeparationApp::new(cc)))),
             )
             .await;
 
