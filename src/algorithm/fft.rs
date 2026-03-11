@@ -3,6 +3,10 @@ use num::Complex;
 // Cooley-Tukey decimation-in-time FFT
 // adapted from the implementation on Wikipedia: https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm
 pub fn fft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
+    assert!(
+        input.len().is_power_of_two(),
+        "fft input length must be a power of 2"
+    );
     if input.len() == 1 {
         vec![input[0]]
     } else {
@@ -36,6 +40,10 @@ pub fn fft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
 
 // implementation based on https://www.embedded.com/dsp-tricks-computing-inverse-ffts-using-the-forward-fft/
 pub fn ifft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
+    assert!(
+        input.len().is_power_of_two(),
+        "ifft input length must be a power of 2"
+    );
     let n = input.len();
     let conjugated: Vec<Complex<f64>> = input.iter().map(|c| c.conj()).collect();
     let mut output = fft(&conjugated);
@@ -89,6 +97,28 @@ mod tests {
         for (o, e) in output.iter().zip(expected.iter()) {
             assert!((o - e).norm() < EPSILON);
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "fft input length must be a power of 2")]
+    fn test_fft_non_power_of_two() {
+        let input = [
+            Complex::new(1.0, 0.0),
+            Complex::new(2.0, 0.0),
+            Complex::new(3.0, 0.0),
+        ];
+        fft(&input);
+    }
+
+    #[test]
+    #[should_panic(expected = "ifft input length must be a power of 2")]
+    fn test_ifft_non_power_of_two() {
+        let input = [
+            Complex::new(1.0, 0.0),
+            Complex::new(2.0, 0.0),
+            Complex::new(3.0, 0.0),
+        ];
+        ifft(&input);
     }
 
     #[test]
