@@ -1,3 +1,4 @@
+mod algorithm;
 mod app;
 
 #[cfg(not(target_arch = "wasm32"))]
