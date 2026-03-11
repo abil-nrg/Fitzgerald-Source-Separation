@@ -34,6 +34,17 @@ pub fn fft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
     }
 }
 
+// implementation based on https://www.embedded.com/dsp-tricks-computing-inverse-ffts-using-the-forward-fft/
+pub fn ifft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
+    let n = input.len();
+    let conjugated: Vec<Complex<f64>> = input.iter().map(|c| c.conj()).collect();
+    let mut output = fft(&conjugated);
+    for x in output.iter_mut() {
+        *x = x.conj() / n as f64;
+    }
+    output
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -54,7 +65,43 @@ mod tests {
             Complex::new(-2.0, 0.0),
             Complex::new(-2.0, -2.0),
         ];
+
         for (o, e) in output.iter().zip(expected.iter()) {
+            assert!((o - e).norm() < EPSILON);
+        }
+    }
+
+    #[test]
+    fn test_ifft() {
+        let input = [
+            Complex::new(10.0, 0.0),
+            Complex::new(-2.0, 2.0),
+            Complex::new(-2.0, 0.0),
+            Complex::new(-2.0, -2.0),
+        ];
+        let output = ifft(&input);
+        let expected = [
+            Complex::new(1.0, 0.0),
+            Complex::new(2.0, 0.0),
+            Complex::new(3.0, 0.0),
+            Complex::new(4.0, 0.0),
+        ];
+        for (o, e) in output.iter().zip(expected.iter()) {
+            assert!((o - e).norm() < EPSILON);
+        }
+    }
+
+    #[test]
+    fn test_fft_ifft() {
+        let input = [
+            Complex::new(0.0, 0.0),
+            Complex::new(1.0, 0.0),
+            Complex::new(2.0, 0.0),
+            Complex::new(3.0, 0.0),
+        ];
+        let output = ifft(&fft(&input));
+        for (o, e) in output.iter().zip(input.iter()) {
+            println!("o: {}, e: {}, diff: {}\n", o, e, (o - e).norm());
             assert!((o - e).norm() < EPSILON);
         }
     }
