@@ -5,9 +5,12 @@ use symphonia::core::probe::Hint;
 use symphonia::core::codecs::CODEC_TYPE_NULL;
 use symphonia::core::audio::SampleBuffer;
 
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+
 use hound;
 
 use std::fs::File;
+use std::io::Cursor;
 
 use crate::Result; //custom in lib.rs
 use crate::FitzgeraldError;
@@ -43,25 +46,9 @@ impl AudioData {
     }
 }
 
-/// Decodes an audio file from the given path into an AudioData struct.
-///
-/// This function supports multiple formats (MP3, WAV, FLAC, etc.) by probing
-/// the file headers and decoding the first available audio track into 32-bit floats.
-///
-/// Args:
-///     path: A string slice representing the path to the audio file.
-///
-/// Returns:
-///     A Result containing AudioData on success, or a SymphoniaError on failure.
-pub fn load_audio(path: &str) -> Result<AudioData> {
-    let file = File::open(path)?;
-    let mss = MediaSourceStream::new(Box::new(file), Default::default());
-
+fn decode_mss(mss:MediaSourceStream) -> Result<AudioData> {
     let mut hint = Hint::new();
-    let format_opts = Default::default();
-    let metadata_opts = Default::default();
-
-    let probed = symphonia::default::get_probe().format(&hint, mss, &format_opts, &metadata_opts)?;
+    let probed = symphonia::default::get_probe().format(&hint, mss, &Default::default(), &Default::default())?;
     let mut format_reader = probed.format;
 
     let track = format_reader
@@ -71,7 +58,6 @@ pub fn load_audio(path: &str) -> Result<AudioData> {
         .expect("No supported audio tacks found");
     
     let track_id = track.id;
-
     let sample_rate = track.codec_params.sample_rate.unwrap_or(44100);
     let channels = track.codec_params.channels.map(|c| c.count()).unwrap_or(2);
     
@@ -120,7 +106,29 @@ pub fn load_audio(path: &str) -> Result<AudioData> {
         sample_rate,
         channels,
     })
+}
 
+pub fn load_audio_from_bytes(bytes: Vec<u8>) -> Result<AudioData> {
+    let cursor = Cursor::new(bytes);
+    let mss = MediaSourceStream::new(Box::new(cursor), Default::default());
+    decode_mss(mss)
+}
+
+/// Decodes an audio file from the given path into an AudioData struct.
+///
+/// This function supports multiple formats (MP3, WAV, FLAC, etc.) by probing
+/// the file headers and decoding the first available audio track into 32-bit floats.
+///
+/// Args:
+///     path: A string slice representing the path to the audio file.
+///
+/// Returns:
+///     A Result containing AudioData on success, or a SymphoniaError on failure.
+pub fn load_audio(path: &str) -> Result<AudioData> {
+    let file = File::open(path)?;
+    let mss = MediaSourceStream::new(Box::new(file), Default::default());
+
+    decode_mss(mss)
 }
 
 /// Encodes and saves audio samples to a WAV file.
@@ -145,6 +153,43 @@ pub fn save_wav(path: &str, audio: &AudioData) -> Result<()> {
     }
     writer.finalize()?;
     Ok(())
+}
+
+pub fn play_audio(audio: &AudioData) -> Result<cpal::Stream> {
+    let host = cpal::default_host();
+    let device = host.default_output_device()
+        .ok_or_else(|| FitzgeraldError::ValidationError("no output device found".into()))?;
+    
+    let config = device.default_output_config().map_err(|e| {
+        FitzgeraldError::ValidationError(format!("can't get default output config: {}", e))
+    })?;
+
+    let _device_sample_rate = config.sample_rate(); 
+    let channels = config.channels() as usize;
+
+    let samples = audio.samples.clone();
+    let mut sample_index = 0;
+
+    let stream = device.build_output_stream(
+        &config.into(),
+        move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
+            for frame in data.chunks_mut(channels) {
+                for sample in frame.iter_mut() {
+                    if sample_index < samples.len() {
+                        *sample = samples[sample_index];
+                        sample_index += 1;
+                    } else {
+                        *sample = 0.0;
+                    }
+                }
+            }
+        },
+        |err| log::error!("playback error: {}", err),
+        None
+    ).map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
+
+    stream.play().map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
+    Ok(stream)
 }
 
 
