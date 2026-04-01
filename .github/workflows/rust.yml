@@ -27,3 +27,8 @@ jobs:
     - name: Run All Tests
       # run unit and audio_integration test
       run: cargo test --verbose --all-targets
+    
+    - name: Install ALSA development headers
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libasound2-dev pkg-config libudev-dev alsa-base alsa-utils
