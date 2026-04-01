@@ -13,28 +13,30 @@ pub fn fft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
         let even = input
             .iter()
             .step_by(2)
-            .cloned()
+            .copied()
             .collect::<Vec<Complex<f64>>>();
-        let odd = input
+
+        let odd = input[1..]
             .iter()
-            .skip(1)
             .step_by(2)
-            .cloned()
+            .copied()
             .collect::<Vec<Complex<f64>>>();
 
         let even = fft(&even);
         let odd = fft(&odd);
 
         let n = input.len();
-        let mut output = vec![Complex::new(0.0, 0.0); n];
+        let (low, high): (Vec<Complex<f64>>, Vec<Complex<f64>>) = even
+            .iter()
+            .zip(odd.iter())
+            .enumerate()
+            .map(|(k, (e, o))| {
+                let t = Complex::new(0.0, -2.0 * std::f64::consts::PI * k as f64 / n as f64).exp();
+                (e + t * o, e - t * o)
+            })
+            .unzip();
 
-        for k in 0..n / 2 {
-            let t = Complex::new(0.0, -2.0 * std::f64::consts::PI * k as f64 / n as f64).exp();
-            output[k] = even[k] + t * odd[k];
-            output[k + n / 2] = even[k] - t * odd[k];
-        }
-
-        output
+        low.into_iter().chain(high).collect()
     }
 }
 

@@ -47,7 +47,7 @@ The "median filtering" approach to source separation as described by FitzGerald 
 
 ## The Algorithm  
 Let $f$ be the frequency and $t$ time.  
-1. Given an input audio signal apply **Short Time Fourier Transform** (STFT) to get $S(f,t)$, the magnitude of a frequence $f$ at time $t$.  
+1. Given an input audio signal apply the **Short Time Fourier Transform** (STFT) to get $S(f,t)$, the magnitude of a frequency $f$ at time $t$.  
 2. Define the **median filter** as 
 
 ```math
@@ -127,7 +127,7 @@ Objective 1: Implement the primitives for the separation algorithm
 - [x] PI1 (basic): Implement the forward Short Time Fourier Transform with configurable frame size and length
 - [x] PI2 (basic): Implement the inverse STFT
 - [ ] PI3 (expected): Implement multiple window functions (Hann, Hamming, Blackman) selectable at runtime
-- [ ] PI4 (expected): Implement the median filter
+- [x] PI4 (expected): Implement the median filter
 - [ ] PI5 (advanced): Generalize all methods over numeric types using `num-traits`
 
 

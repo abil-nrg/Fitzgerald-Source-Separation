@@ -3,7 +3,8 @@ pub mod audio;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum FitzgeraldError { //get errors from either symph or hound in audio, so combine
+pub enum FitzgeraldError {
+    //get errors from either symph or hound in audio, so combine
     #[error("File system error: {0}")]
     Io(#[from] std::io::Error),
 

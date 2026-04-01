@@ -1,9 +1,8 @@
-
+use symphonia::core::audio::SampleBuffer;
+use symphonia::core::codecs::CODEC_TYPE_NULL;
 use symphonia::core::errors::Error as SymphoniaError;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::probe::Hint;
-use symphonia::core::codecs::CODEC_TYPE_NULL;
-use symphonia::core::audio::SampleBuffer;
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
@@ -12,8 +11,8 @@ use hound;
 use std::fs::File;
 use std::io::Cursor;
 
-use crate::Result; //custom in lib.rs
 use crate::FitzgeraldError;
+use crate::Result; //custom in lib.rs
 
 /// Container for raw audio samples and associated metadata.
 ///
@@ -22,9 +21,9 @@ use crate::FitzgeraldError;
 ///     sample_rate: The num of samples per s
 ///     channels: The num of audio channels (1 for mono, 2 for stereo).
 pub struct AudioData {
-    pub samples : Vec<f32>,
-    pub sample_rate : u32,
-    pub channels: usize
+    pub samples: Vec<f32>,
+    pub sample_rate: u32,
+    pub channels: usize,
 }
 
 impl AudioData {
@@ -46,9 +45,14 @@ impl AudioData {
     }
 }
 
-fn decode_mss(mss:MediaSourceStream) -> Result<AudioData> {
-    let mut hint = Hint::new();
-    let probed = symphonia::default::get_probe().format(&hint, mss, &Default::default(), &Default::default())?;
+fn decode_mss(mss: MediaSourceStream) -> Result<AudioData> {
+    let hint = Hint::new();
+    let probed = symphonia::default::get_probe().format(
+        &hint,
+        mss,
+        &Default::default(),
+        &Default::default(),
+    )?;
     let mut format_reader = probed.format;
 
     let track = format_reader
@@ -56,15 +60,14 @@ fn decode_mss(mss:MediaSourceStream) -> Result<AudioData> {
         .iter()
         .find(|t| t.codec_params.codec != CODEC_TYPE_NULL)
         .expect("No supported audio tacks found");
-    
+
     let track_id = track.id;
     let sample_rate = track.codec_params.sample_rate.unwrap_or(44100);
     let channels = track.codec_params.channels.map(|c| c.count()).unwrap_or(2);
-    
+
     //make the decoder
     let decoder_opts = Default::default();
-    let mut decoder = symphonia::default::get_codecs()
-        .make(&track.codec_params, &decoder_opts)?;
+    let mut decoder = symphonia::default::get_codecs().make(&track.codec_params, &decoder_opts)?;
 
     let mut all_samples: Vec<f32> = Vec::new();
 
@@ -74,7 +77,9 @@ fn decode_mss(mss:MediaSourceStream) -> Result<AudioData> {
         let packet = match format_reader.next_packet() {
             Ok(packet) => packet,
             // If we reach the end of the file, break out of the loop cleanly
-            Err(SymphoniaError::IoError(e)) if e.kind() == std::io::ErrorKind::UnexpectedEof => break,
+            Err(SymphoniaError::IoError(e)) if e.kind() == std::io::ErrorKind::UnexpectedEof => {
+                break;
+            }
             Err(e) => return Err(FitzgeraldError::Symphonia(e)),
         };
 
@@ -87,12 +92,10 @@ fn decode_mss(mss:MediaSourceStream) -> Result<AudioData> {
         match decoder.decode(&packet) {
             Ok(audio_buf) => {
                 // normalize to f32.
-                let mut sample_buf = SampleBuffer::<f32>::new(
-                    audio_buf.capacity() as u64, 
-                    *audio_buf.spec()
-                );
+                let mut sample_buf =
+                    SampleBuffer::<f32>::new(audio_buf.capacity() as u64, *audio_buf.spec());
                 sample_buf.copy_interleaved_ref(audio_buf);
-                
+
                 all_samples.extend_from_slice(sample_buf.samples());
             }
             Err(SymphoniaError::DecodeError(_)) => continue,
@@ -157,41 +160,45 @@ pub fn save_wav(path: &str, audio: &AudioData) -> Result<()> {
 
 pub fn play_audio(audio: &AudioData) -> Result<cpal::Stream> {
     let host = cpal::default_host();
-    let device = host.default_output_device()
+    let device = host
+        .default_output_device()
         .ok_or_else(|| FitzgeraldError::ValidationError("no output device found".into()))?;
-    
+
     let config = device.default_output_config().map_err(|e| {
         FitzgeraldError::ValidationError(format!("can't get default output config: {}", e))
     })?;
 
-    let _device_sample_rate = config.sample_rate(); 
+    let _device_sample_rate = config.sample_rate();
     let channels = config.channels() as usize;
 
     let samples = audio.samples.clone();
     let mut sample_index = 0;
 
-    let stream = device.build_output_stream(
-        &config.into(),
-        move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-            for frame in data.chunks_mut(channels) {
-                for sample in frame.iter_mut() {
-                    if sample_index < samples.len() {
-                        *sample = samples[sample_index];
-                        sample_index += 1;
-                    } else {
-                        *sample = 0.0;
+    let stream = device
+        .build_output_stream(
+            &config.into(),
+            move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
+                for frame in data.chunks_mut(channels) {
+                    for sample in frame.iter_mut() {
+                        if sample_index < samples.len() {
+                            *sample = samples[sample_index];
+                            sample_index += 1;
+                        } else {
+                            *sample = 0.0;
+                        }
                     }
                 }
-            }
-        },
-        |err| log::error!("playback error: {}", err),
-        None
-    ).map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
+            },
+            |err| log::error!("playback error: {}", err),
+            None,
+        )
+        .map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
 
-    stream.play().map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
+    stream
+        .play()
+        .map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
     Ok(stream)
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -204,7 +211,7 @@ mod tests {
         let freq = 440.0;
         let duration = 1.0;
         let num_samples = (sample_rate as f32 * duration) as usize;
-        
+
         let mut samples = Vec::with_capacity(num_samples);
         for i in 0..num_samples {
             let t = i as f32 / sample_rate as f32;
@@ -225,7 +232,9 @@ mod tests {
 
         assert_eq!(loaded_audio.sample_rate, original_audio.sample_rate);
         assert_eq!(loaded_audio.channels, original_audio.channels);
-        assert!((loaded_audio.samples.len() as i32 - original_audio.samples.len() as i32).abs() < 100);
+        assert!(
+            (loaded_audio.samples.len() as i32 - original_audio.samples.len() as i32).abs() < 100
+        );
 
         let _ = std::fs::remove_file(test_file);
     }

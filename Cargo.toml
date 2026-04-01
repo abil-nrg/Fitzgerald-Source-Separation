@@ -12,18 +12,19 @@ rfd = "0.17.2"
 symphonia = { version = "0.5.5", features = ["all"] }
 thiserror = "1.0"
 hound = "3.5"
-cpal = "0.17.3"
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 env_logger = "0.11.8"
 poll-promise = { version = "0.3.0", features = ["smol", "smol_tick_poll"] }
+cpal = "0.17.3"
 
 # web:
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 poll-promise = { version = "0.3.0", features = ["web"] }
 wasm-bindgen-futures = "0.4.50"
 web-sys = "0.3.70"
+cpal = { version = "0.17.3", features = ["wasm-bindgen"] }
 
 
 
