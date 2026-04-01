@@ -197,6 +197,8 @@ pub fn play_audio(audio: &AudioData) -> Result<cpal::Stream> {
     stream
         .play()
         .map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
+
+    log::info!("Playing audio...");
     Ok(stream)
 }
 

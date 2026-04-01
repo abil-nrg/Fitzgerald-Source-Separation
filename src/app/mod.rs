@@ -153,21 +153,21 @@ impl eframe::App for SeparationApp {
                     }
                 }
 
-                if let Some(harmonic) = &self.harmonic_audio {
-                    if ui.button("Play harmonic").clicked() {
-                        match fitzgerald_source_separation::audio::play_audio(harmonic) {
-                            Ok(stream) => self.current_stream = Some(stream),
-                            Err(e) => log::error!("playback failed: {}", e),
-                        }
+                if let Some(harmonic) = &self.harmonic_audio
+                    && ui.button("Play harmonic").clicked()
+                {
+                    match fitzgerald_source_separation::audio::play_audio(harmonic) {
+                        Ok(stream) => self.current_stream = Some(stream),
+                        Err(e) => log::error!("playback failed: {}", e),
                     }
                 }
 
-                if let Some(percussive) = &self.percussive_audio {
-                    if ui.button("Play percussive").clicked() {
-                        match fitzgerald_source_separation::audio::play_audio(percussive) {
-                            Ok(stream) => self.current_stream = Some(stream),
-                            Err(e) => log::error!("playback failed: {}", e),
-                        }
+                if let Some(percussive) = &self.percussive_audio
+                    && ui.button("Play percussive").clicked()
+                {
+                    match fitzgerald_source_separation::audio::play_audio(percussive) {
+                        Ok(stream) => self.current_stream = Some(stream),
+                        Err(e) => log::error!("playback failed: {}", e),
                     }
                 }
 
