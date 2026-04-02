@@ -88,7 +88,7 @@ In a separate binary crate, we will design and implement a visualization of the 
 
 Objective 1: Implement audio I/O, testing infrastructure, library API design
 
-- [ ] PI1 (basic): Implement audio file loading and decoding for common formats with sample rate and channel metadata extraction
+- [x] PI1 (basic): Implement audio file loading and decoding for common formats with sample rate and channel metadata extraction
 - [ ] PI2 (basic): Implement audio file export so that separated signals can be saved as WAV files
 - [ ] PI3 (expected): Design and document a clean public API for the library crate, with idiomatic Rust error handling (`Result` types, use `thiserror` for libraries)
 - [ ] PI4 (expected): Use unit and integration tests across the library using `cargo test`, including edge cases
@@ -96,9 +96,9 @@ Objective 1: Implement audio I/O, testing infrastructure, library API design
 
 Objective 2: Implement the harmonic/percussive separation
 
-- [ ] PI1 (basic): Compute the harmonic-enhanced spectrogram $H(t,f)$ and percussive-enhanced spectrogram $P(t,f)$ from the median-filtered outputs
-- [ ] PI2 (basic): Construct the binary masks $M_H$ and $M_P$ from $H$ and $P$
-- [ ] PI3 (expected): Apply the binary masks to the STFT and reconstruct signals via iSTFT
+- [x] PI1 (basic): Compute the harmonic-enhanced spectrogram $H(t,f)$ and percussive-enhanced spectrogram $P(t,f)$ from the median-filtered outputs
+- [x] PI2 (basic): Construct the binary masks $M_H$ and $M_P$ from $H$ and $P$
+- [x] PI3 (expected): Apply the binary masks to the STFT and reconstruct signals via iSTFT
 - [ ] PI4 (expected): Validate separation quality by testing on known synthetic inputs
 - [ ] PI5 (advanced): Implement soft masking as an alternative to binary masking and compare separation quality against the binary approach
 
@@ -107,16 +107,16 @@ Objective 2: Implement the harmonic/percussive separation
 Objective 1: Implement the egui application and spectrogram
 
 - [x] PI1 (basic): Use `eframe` to create a cross platform egui app, use `rfd` to allow cross-platform file loading
-- [ ] PI2 (basic): Implement a custom egui widget that renders a spectrogram as an image
+- [x] PI2 (basic): Implement a custom egui widget that renders a spectrogram as an image
 - [ ] PI3 (expected): Display side-by-side spectrograms for the input signal, harmonic component, percussive component, updating in response to parameter changes
 - [ ] PI4 (expected): Add controls (sliders?) for adjusting median filter length, FFT frame size, window function, with spectrogram re-rendering
 - [ ] PI5 (advanced): Implement zoom and scroll interaction on the spectrogram widget
 
 Objective 2: Implement audio playback and waveform display
 
-- [ ] PI1 (basic): Use an audio backend (look at `cpal` for WASM compatability) to play the original loaded audio file
+- [x] PI1 (basic): Use an audio backend (look at `cpal` for WASM compatability) to play the original loaded audio file
 - [ ] PI2 (basic): Display the waveform of the loaded audio alongside the spectrogram
-- [ ] PI3 (expected): Enable playback of the separated harmonic and percussive streams with toggle controls
+- [x] PI3 (expected): Enable playback of the separated harmonic and percussive streams with toggle controls
 - [ ] PI4 (expected): Implement a playback cursor synchronized across the waveform and spectrogram views
 - [ ] PI5 (advanced): Comparison mode to seamlessly switch between original, harmonic, and percussive outputs during playback
 
