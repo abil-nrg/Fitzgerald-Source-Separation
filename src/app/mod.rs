@@ -86,12 +86,28 @@ impl eframe::App for SeparationApp {
         if let Some(bytes) = self.menu_bar.poll_file() {
             match fitzgerald_source_separation::audio::load_audio_from_bytes(bytes) {
                 Ok(data) => {
-                    log::info!("loaded audio: {} samples", data.samples.len());
+                    log::info!(
+                        "loaded audio: {} samples, {} channels",
+                        data.samples.len(),
+                        data.channels
+                    );
 
-                    let mono = data.to_mono();
+                    let mono = if data.channels == 1 {
+                        data.samples.clone()
+                    } else {
+                        data.to_mono()
+                    };
                     let frames = stft::stft(&mono, spectrogram::WINDOW_SIZE, spectrogram::HOP_SIZE);
                     self.original_spectrogram = Some(Spectrogram::from_audio(ctx, &frames));
-                    self.loaded_audio = Some(data);
+                    self.loaded_audio = Some(if data.channels == 1 {
+                        AudioData {
+                            samples: data.samples.iter().flat_map(|&s| [s, s]).collect(),
+                            sample_rate: data.sample_rate,
+                            channels: 2,
+                        }
+                    } else {
+                        data
+                    });
                     self.original_frames = Some(frames);
                     self.separate();
 
