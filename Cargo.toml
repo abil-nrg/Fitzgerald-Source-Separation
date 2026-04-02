@@ -23,8 +23,10 @@ cpal = "0.17.3"
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 poll-promise = { version = "0.3.0", features = ["web"] }
 wasm-bindgen-futures = "0.4.50"
-web-sys = "0.3.70"
+web-sys = { version = "0.3.70", features = ["AudioContext"] }
+js-sys = "0.3"
 cpal = { version = "0.17.3", features = ["wasm-bindgen"] }
+wasm-bindgen = "0.2"
 
 
 

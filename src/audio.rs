@@ -159,6 +159,15 @@ pub fn save_wav(path: &str, audio: &AudioData) -> Result<()> {
 }
 
 pub fn play_audio(audio: &AudioData) -> Result<cpal::Stream> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        // forcefully resume audio context
+        let audio_ctx = web_sys::AudioContext::new().map_err(|e| {
+            FitzgeraldError::ValidationError(format!("AudioContext::new failed: {:?}", e))
+        })?;
+        let _ = audio_ctx.resume();
+    }
+
     let host = cpal::default_host();
     let device = host
         .default_output_device()
@@ -198,7 +207,6 @@ pub fn play_audio(audio: &AudioData) -> Result<cpal::Stream> {
         .play()
         .map_err(|e| FitzgeraldError::ValidationError(e.to_string()))?;
 
-    log::info!("Playing audio...");
     Ok(stream)
 }
 
