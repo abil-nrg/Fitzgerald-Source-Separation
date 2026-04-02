@@ -9,7 +9,6 @@ pub fn median_filter(input: &[f64], window_size: usize) -> Vec<f64> {
 
         window.resize(window_size, 0.0);
         window.sort_by(|a, b| a.partial_cmp(b).unwrap());
-        println!("Window for index {}: {:?}", i, window);
         output.push(window[window.len() / 2]);
     }
 
