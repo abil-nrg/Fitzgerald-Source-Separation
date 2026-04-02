@@ -1,6 +1,7 @@
 use egui::Ui;
 use poll_promise::Promise;
 
+const TEST_AUDIO: &[u8] = include_bytes!("../../assets/test.wav");
 #[derive(Default)]
 pub struct MenuBar {
     file_promise: Option<Promise<Option<Vec<u8>>>>,
@@ -29,6 +30,9 @@ impl MenuBar {
             ui.menu_button("File", |ui| {
                 if ui.button("Open Audio").clicked() {
                     self.open_file_dialog();
+                }
+                if ui.button("Load Example").clicked() {
+                    self.file_promise = Some(Promise::from_ready(Some(TEST_AUDIO.to_vec())));
                 }
             });
         });
