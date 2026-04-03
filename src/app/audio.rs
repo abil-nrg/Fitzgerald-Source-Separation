@@ -13,13 +13,22 @@ pub struct Audio {
 }
 
 impl Audio {
-    pub fn from_audio_data(ctx: &egui::Context, data: AudioData) -> Self {
+    pub fn from_audio_data(
+        ctx: &egui::Context,
+        data: AudioData,
+        window: fn(usize) -> Vec<f64>,
+    ) -> Self {
         let mono = if data.channels == 1 {
             data.samples.clone()
         } else {
             data.to_mono()
         };
-        let frames = stft::stft(&mono, spectrogram::WINDOW_SIZE, spectrogram::HOP_SIZE);
+        let frames = stft::stft(
+            &mono,
+            spectrogram::WINDOW_SIZE,
+            spectrogram::HOP_SIZE,
+            window,
+        );
         let spectrogram = Spectrogram::from_audio(ctx, &frames);
         Self {
             data,
@@ -33,6 +42,7 @@ impl Audio {
         frames: Vec<Vec<Complex<f64>>>,
         sample_rate: u32,
         channels: usize,
+        window: fn(usize) -> Vec<f64>,
     ) -> Self {
         let spectrogram = Spectrogram::from_audio(ctx, &frames);
         let total_len = (frames.len() - 1) * spectrogram::HOP_SIZE + spectrogram::WINDOW_SIZE;
@@ -41,6 +51,7 @@ impl Audio {
             spectrogram::WINDOW_SIZE,
             spectrogram::HOP_SIZE,
             total_len,
+            window,
         );
         let data = AudioData {
             samples,
@@ -59,6 +70,7 @@ impl Audio {
         ctx: &egui::Context,
         harmonic_kernel_size: usize,
         percussive_kernel_size: usize,
+        window: fn(usize) -> Vec<f64>,
     ) -> (Audio, Audio) {
         let num_frames = self.frames.len();
         let num_bins = self.frames[0].len();
@@ -96,8 +108,9 @@ impl Audio {
             }
         }
 
-        let harmonic = Audio::from_frames(ctx, harmonic_frames, self.data.sample_rate, 1);
-        let percussive = Audio::from_frames(ctx, percussive_frames, self.data.sample_rate, 1);
+        let harmonic = Audio::from_frames(ctx, harmonic_frames, self.data.sample_rate, 1, window);
+        let percussive =
+            Audio::from_frames(ctx, percussive_frames, self.data.sample_rate, 1, window);
         (harmonic, percussive)
     }
 }

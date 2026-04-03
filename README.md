@@ -90,8 +90,8 @@ Objective 1: Implement audio I/O, testing infrastructure, library API design
 
 - [x] PI1 (basic): Implement audio file loading and decoding for common formats with sample rate and channel metadata extraction
 - [ ] PI2 (basic): Implement audio file export so that separated signals can be saved as WAV files
-- [ ] PI3 (expected): Design and document a clean public API for the library crate, with idiomatic Rust error handling (`Result` types, use `thiserror` for libraries)
-- [ ] PI4 (expected): Use unit and integration tests across the library using `cargo test`, including edge cases
+- [x] PI3 (expected): Design and document a clean public API for the library crate, with idiomatic Rust error handling (`Result` types, use `thiserror` for libraries)
+- [x] PI4 (expected): Use unit and integration tests across the library using `cargo test`, including edge cases
 - [x] PI5 (advanced): Set up continuous integration with automated test runs
 
 Objective 2: Implement the harmonic/percussive separation
@@ -99,7 +99,7 @@ Objective 2: Implement the harmonic/percussive separation
 - [x] PI1 (basic): Compute the harmonic-enhanced spectrogram $H(t,f)$ and percussive-enhanced spectrogram $P(t,f)$ from the median-filtered outputs
 - [x] PI2 (basic): Construct the binary masks $M_H$ and $M_P$ from $H$ and $P$
 - [x] PI3 (expected): Apply the binary masks to the STFT and reconstruct signals via iSTFT
-- [ ] PI4 (expected): Validate separation quality by testing on known synthetic inputs
+- [x] PI4 (expected): Validate separation quality by testing on known synthetic inputs
 - [ ] PI5 (advanced): Implement soft masking as an alternative to binary masking and compare separation quality against the binary approach
 
 ## Ngan Nguyen
@@ -108,8 +108,8 @@ Objective 1: Implement the egui application and spectrogram
 
 - [x] PI1 (basic): Use `eframe` to create a cross platform egui app, use `rfd` to allow cross-platform file loading
 - [x] PI2 (basic): Implement a custom egui widget that renders a spectrogram as an image
-- [ ] PI3 (expected): Display side-by-side spectrograms for the input signal, harmonic component, percussive component, updating in response to parameter changes
-- [ ] PI4 (expected): Add controls (sliders?) for adjusting median filter length, FFT frame size, window function, with spectrogram re-rendering
+- [x] PI3 (expected): Display side-by-side spectrograms for the input signal, harmonic component, percussive component, updating in response to parameter changes
+- [x] PI4 (expected): Add controls (sliders?) for adjusting median filter length, FFT frame size, window function, with spectrogram re-rendering
 - [ ] PI5 (advanced): Implement zoom and scroll interaction on the spectrogram widget
 
 Objective 2: Implement audio playback and waveform display
@@ -136,7 +136,7 @@ Objective 2: Target WebAssembly and deploy the application as a public website
 - [x] PI1 (basic): Configure the project for `wasm32` compilation and resolve platform-specific dependencies
 - [x] PI2 (basic): Compile and run the egui application in a web browser via WebAssembly with basic functionality intact
 - [x] PI3 (expected): Implement browser-compatible audio loading (look at `rfd`)
-- [ ] PI4 (expected): Implement browser-compatible audio playback (look at `cpal`)
+- [x] PI4 (expected): Implement browser-compatible audio playback (look at `cpal`)
 - [ ] PI5 (advanced): Deploy the WASM application as a publicly hosted website
 
 ----

@@ -34,7 +34,8 @@ impl eframe::App for SeparationApp {
                         data.channels
                     );
 
-                    let original = Audio::from_audio_data(ctx, data);
+                    let original =
+                        Audio::from_audio_data(ctx, data, self.options.window_function.fun());
                     self.original = Some(original);
                 }
                 Err(e) => log::error!("can't load audio: {e}"),
@@ -85,6 +86,7 @@ impl eframe::App for SeparationApp {
                         ctx,
                         self.options.harmonic_kernel_size,
                         self.options.percussive_kernel_size,
+                        self.options.window_function.fun(),
                     );
                     self.harmonic = Some(harmonic);
                     self.percussive = Some(percussive);
