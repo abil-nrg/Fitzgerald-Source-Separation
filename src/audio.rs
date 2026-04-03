@@ -178,23 +178,28 @@ pub fn play_audio(audio: &AudioData) -> Result<cpal::Stream> {
     })?;
 
     let _device_sample_rate = config.sample_rate();
-    let channels = config.channels() as usize;
+    let device_channels = config.channels() as usize;
+    let audio_channels = audio.channels;
 
     let samples = audio.samples.clone();
-    let mut sample_index = 0;
+    let num_audio_frames = samples.len() / audio_channels;
+    let mut frame_index = 0;
 
     let stream = device
         .build_output_stream(
             &config.into(),
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                for frame in data.chunks_mut(channels) {
-                    for sample in frame.iter_mut() {
-                        if sample_index < samples.len() {
-                            *sample = samples[sample_index];
-                            sample_index += 1;
+                for device_frame in data.chunks_mut(device_channels) {
+                    for (ch, out_sample) in device_frame.iter_mut().enumerate() {
+                        if frame_index < num_audio_frames {
+                            let src_ch = ch % audio_channels;
+                            *out_sample = samples[frame_index * audio_channels + src_ch];
                         } else {
-                            *sample = 0.0;
+                            *out_sample = 0.0;
                         }
+                    }
+                    if frame_index < num_audio_frames {
+                        frame_index += 1;
                     }
                 }
             },

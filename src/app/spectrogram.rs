@@ -55,7 +55,7 @@ impl Spectrogram {
         }
     }
 
-    pub fn draw(&self, ui: &mut egui::Ui) {
+    pub fn ui(&self, ui: &mut egui::Ui) {
         let image = egui::Image::new(&self.texture)
             .shrink_to_fit()
             .maintain_aspect_ratio(false);
