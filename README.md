@@ -2,7 +2,7 @@
 
 ## Overview
 
-An implementation of an interactive audio source seperation system based on **Derry Fitzgerald's median filtering algorithm** [1]. We take a polyphonic audio file and decompose it into its harmonic (tonal instruments) and percussive (drums) components.
+An implementation of an interactive audio source separation system based on **Derry Fitzgerald's median filtering algorithm** [1]. We take a polyphonic audio file and decompose it into its harmonic (tonal instruments) and percussive (drums) components.
 
 Rust is used for the algorithm and GUI.
 
@@ -32,9 +32,9 @@ trunk serve
 
 ## Introduction
 
-Our problem is Music Source Seperation, the decomposition of polyphonic audio into it's individual components. MSS has been used effectively in a variety of disciplines, such as manatee population estimation [2], cardiac feature monitoring [3], and bird sound labelling [4]. It has applications in music production and vocal removal for karaoke.
+Our problem is Music Source Separation, the decomposition of polyphonic audio into it's individual components. MSS has been used effectively in a variety of disciplines, such as manatee population estimation [2], cardiac feature monitoring [3], and bird sound labelling [4]. It has applications in music production and vocal removal for karaoke.
 
-We will be implementing the algorithm described by Derry FitzGerald in his paper "Harmonic/Percussive Seperation using Median Filtering" [1]. A non-deep learning, deterministic appraoch to source seperation. The result will be visualized in a GUI impleneted in Rust using custom widgets and **egui** [5]. The extensive monomorphization of generic code and "const generics" performed by the `rustc` compiler allows for extremely high-performance code generation, while preserving compile-time guarantees of memory safety [6].
+We will be implementing the algorithm described by Derry FitzGerald in his paper "Harmonic/Percussive Separation using Median Filtering" [1]. A non-deep learning, deterministic approach to source separation. The result will be visualized in a GUI implemented in Rust using custom widgets and **egui** [5]. The extensive monomorphization of generic code and "const generics" performed by the `rustc` compiler allows for extremely high-performance code generation, while preserving compile-time guarantees of memory safety [6].
 
 
 ## Related Work
@@ -43,7 +43,7 @@ While recent research in music source separation has focused on deep learning ap
 
 The basis for the our chosen approach to source separation is described by Onu et al. [9]. In a spectrogram, harmonic components tend to be "short and long" while percussive components are "tall and narrow". The vertical and horizontal components are separated using complementary diffusion. While effective, this approach is not efficient enough to support real-time source separation.
 
-The "median filtering" approach to source separation as described by FitzGerald shares the unique feature of not requiring a pretrained model, while also being significantly less computationally expensive. This allows the approach to be used in real-time applications [1].
+The "median filtering" approach to source separation as described by FitzGerald shares the unique feature of not requiring a pre-trained model, while also being significantly less computationally expensive. This allows the approach to be used in real-time applications [1].
 
 ## The Algorithm  
 Let $f$ be the frequency and $t$ time.  
@@ -72,7 +72,7 @@ For some $x(n)$, an array, and $l$, a filter size.
         0,& \text{otherwise}
     \end{cases}
 ```  
-6. Apply the **Inverse Short Time Fourier Transform** (iSTFT) to return the masked spectograms to the time domain. 
+6. Apply the **Inverse Short Time Fourier Transform** (iSTFT) to return the masked spectrograms to the time domain. 
 
 ## Implementation
 
@@ -114,7 +114,7 @@ Objective 1: Implement the egui application and spectrogram
 
 Objective 2: Implement audio playback and waveform display
 
-- [x] PI1 (basic): Use an audio backend (look at `cpal` for WASM compatability) to play the original loaded audio file
+- [x] PI1 (basic): Use an audio backend (look at `cpal` for WASM compatibility) to play the original loaded audio file
 - [ ] PI2 (basic): Display the waveform of the loaded audio alongside the spectrogram
 - [x] PI3 (expected): Enable playback of the separated harmonic and percussive streams with toggle controls
 - [ ] PI4 (expected): Implement a playback cursor synchronized across the waveform and spectrogram views
