@@ -1,3 +1,9 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+#![allow(
+    clippy::cast_sign_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_precision_loss
+)]
 mod algorithm;
 mod app;
 

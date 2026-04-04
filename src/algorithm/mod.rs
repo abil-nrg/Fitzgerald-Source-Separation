@@ -1,5 +1,4 @@
 use core::f64;
-use std::iter;
 
 pub mod fft;
 pub mod filter;
@@ -15,23 +14,23 @@ pub enum Window {
 }
 
 impl Window {
-    pub fn fun(&self) -> fn(usize) -> Vec<f64> {
+    pub const fn fun(self) -> fn(usize) -> Vec<f64> {
         match self {
-            Window::Hann => hann_window,
-            Window::Rectangular => rectangular_window,
-            Window::Triangular => triangular_window,
-            Window::Blackman => blackman_window,
-            Window::Hamming => hamming_window,
+            Self::Hann => hann_window,
+            Self::Rectangular => rectangular_window,
+            Self::Triangular => triangular_window,
+            Self::Blackman => blackman_window,
+            Self::Hamming => hamming_window,
         }
     }
 
-    pub fn name(&self) -> &'static str {
+    pub const fn name(self) -> &'static str {
         match self {
-            Window::Hann => "Hann Window",
-            Window::Rectangular => "Rectangular Window",
-            Window::Triangular => "Triangular Window",
-            Window::Blackman => "Blackman Window",
-            Window::Hamming => "Hamming Window",
+            Self::Hann => "Hann Window",
+            Self::Rectangular => "Rectangular Window",
+            Self::Triangular => "Triangular Window",
+            Self::Blackman => "Blackman Window",
+            Self::Hamming => "Hamming Window",
         }
     }
 }
@@ -40,13 +39,18 @@ impl Window {
 
 pub fn hann_window(size: usize) -> Vec<f64> {
     (0..size)
-        .map(|n| 0.5 - 0.5 * (2.0 * f64::consts::PI * n as f64 / size as f64).cos())
+        .map(|n| 0.5_f64.mul_add(-(2.0 * f64::consts::PI * n as f64 / size as f64).cos(), 0.5))
         .collect()
 }
 
 pub fn hamming_window(size: usize) -> Vec<f64> {
     (0..size)
-        .map(|n| 0.54 - 0.46 * (2.0 * f64::consts::PI * n as f64 / size as f64).cos())
+        .map(|n| {
+            0.46_f64.mul_add(
+                -(2.0 * f64::consts::PI * n as f64 / size as f64).cos(),
+                0.54,
+            )
+        })
         .collect()
 }
 

@@ -16,7 +16,7 @@ pub fn stft(
     while start + window_size <= signal.len() {
         let mut frame = vec![Complex::new(0.0, 0.0); fft_size];
         for i in 0..window_size {
-            frame[i] = Complex::new(signal[start + i] as f64 * window[i], 0.0);
+            frame[i] = Complex::new(f64::from(signal[start + i]) * window[i], 0.0);
         }
 
         frames.push(fft(&frame));

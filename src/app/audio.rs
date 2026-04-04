@@ -71,7 +71,7 @@ impl Audio {
         harmonic_kernel_size: usize,
         percussive_kernel_size: usize,
         window: fn(usize) -> Vec<f64>,
-    ) -> (Audio, Audio) {
+    ) -> (Self, Self) {
         let num_frames = self.frames.len();
         let num_bins = self.frames[0].len();
 
@@ -108,9 +108,9 @@ impl Audio {
             }
         }
 
-        let harmonic = Audio::from_frames(ctx, harmonic_frames, self.data.sample_rate, 1, window);
+        let harmonic = Self::from_frames(ctx, harmonic_frames, self.data.sample_rate, 1, window);
         let percussive =
-            Audio::from_frames(ctx, percussive_frames, self.data.sample_rate, 1, window);
+            Self::from_frames(ctx, percussive_frames, self.data.sample_rate, 1, window);
         (harmonic, percussive)
     }
 }

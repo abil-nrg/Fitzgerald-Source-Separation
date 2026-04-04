@@ -1,4 +1,4 @@
-use crate::algorithm::{Window, hann_window, rectangular_window};
+use crate::algorithm::Window;
 
 pub struct Options {
     pub harmonic_kernel_size: usize,

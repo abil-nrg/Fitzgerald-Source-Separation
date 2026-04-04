@@ -26,7 +26,7 @@ impl Spectrogram {
         let max_db = db_matrix
             .iter()
             .flat_map(|row| row.iter())
-            .cloned()
+            .copied()
             .fold(f64::NEG_INFINITY, f64::max);
 
         let min_db = max_db - 80.0;

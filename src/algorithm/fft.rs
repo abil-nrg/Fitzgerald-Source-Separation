@@ -47,9 +47,9 @@ pub fn ifft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
         "ifft input length must be a power of 2"
     );
     let n = input.len();
-    let conjugated: Vec<Complex<f64>> = input.iter().map(|c| c.conj()).collect();
+    let conjugated: Vec<Complex<f64>> = input.iter().map(num::Complex::conj).collect();
     let mut output = fft(&conjugated);
-    for x in output.iter_mut() {
+    for x in &mut output {
         *x = x.conj() / n as f64;
     }
     output

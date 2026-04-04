@@ -1,7 +1,7 @@
 mod audio;
-pub mod menu_bar;
+mod menu_bar;
 mod options;
-pub mod spectrogram;
+mod spectrogram;
 
 use audio::Audio;
 
@@ -19,7 +19,7 @@ pub struct SeparationApp {
 
 impl SeparationApp {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
-        Default::default()
+        Self::default()
     }
 }
 
@@ -53,7 +53,7 @@ impl eframe::App for SeparationApp {
                 if ui.button("Play Original").clicked() {
                     match fitzgerald_source_separation::audio::play_audio(&original.data) {
                         Ok(stream) => self.current_stream = Some(stream),
-                        Err(e) => log::error!("playback failed: {}", e),
+                        Err(e) => log::error!("playback failed: {e}"),
                     }
                 }
 
@@ -61,14 +61,14 @@ impl eframe::App for SeparationApp {
                     if ui.button("Play Harmonic").clicked() {
                         match fitzgerald_source_separation::audio::play_audio(&harmonic.data) {
                             Ok(stream) => self.current_stream = Some(stream),
-                            Err(e) => log::error!("playback failed: {}", e),
+                            Err(e) => log::error!("playback failed: {e}"),
                         }
                     }
 
                     if ui.button("Play Percussive").clicked() {
                         match fitzgerald_source_separation::audio::play_audio(&percussive.data) {
                             Ok(stream) => self.current_stream = Some(stream),
-                            Err(e) => log::error!("playback failed: {}", e),
+                            Err(e) => log::error!("playback failed: {e}"),
                         }
                     }
                 }
@@ -93,6 +93,9 @@ impl eframe::App for SeparationApp {
                 }
             } else {
                 ui.label("Load an audio file");
+                ui.separator();
+                ui.label("For more information, see the GitHub Repository:");
+                ui.hyperlink("https://github.com/abil-nrg/Fitzgerald-Source-Separation");
             }
         });
 
