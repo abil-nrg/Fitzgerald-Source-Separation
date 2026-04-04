@@ -1,9 +1,9 @@
-use crate::algorithm::{WindowFunction, hann_window, rectangular_window};
+use crate::algorithm::{Window, hann_window, rectangular_window};
 
 pub struct Options {
     pub harmonic_kernel_size: usize,
     pub percussive_kernel_size: usize,
-    pub window_function: WindowFunction,
+    pub window_function: Window,
 }
 
 impl Default for Options {
@@ -11,7 +11,7 @@ impl Default for Options {
         Self {
             harmonic_kernel_size: 20,
             percussive_kernel_size: 20,
-            window_function: WindowFunction::HannWindow,
+            window_function: Window::Hann,
         }
     }
 }
@@ -23,15 +23,26 @@ impl Options {
         egui::ComboBox::from_label("Window Function")
             .selected_text(self.window_function.name())
             .show_ui(ui, |ui| {
+                ui.selectable_value(&mut self.window_function, Window::Hann, Window::Hann.name());
                 ui.selectable_value(
                     &mut self.window_function,
-                    WindowFunction::HannWindow,
-                    WindowFunction::HannWindow.name(),
+                    Window::Rectangular,
+                    Window::Rectangular.name(),
                 );
                 ui.selectable_value(
                     &mut self.window_function,
-                    WindowFunction::RectangularWindow,
-                    WindowFunction::RectangularWindow.name(),
+                    Window::Triangular,
+                    Window::Triangular.name(),
+                );
+                ui.selectable_value(
+                    &mut self.window_function,
+                    Window::Blackman,
+                    Window::Blackman.name(),
+                );
+                ui.selectable_value(
+                    &mut self.window_function,
+                    Window::Hamming,
+                    Window::Hamming.name(),
                 );
             });
 

@@ -126,7 +126,7 @@ Objective 1: Implement the primitives for the separation algorithm
 
 - [x] PI1 (basic): Implement the forward Short Time Fourier Transform with configurable frame size and length
 - [x] PI2 (basic): Implement the inverse STFT
-- [ ] PI3 (expected): Implement multiple window functions (Hann, Hamming, Blackman) selectable at runtime
+- [x] PI3 (expected): Implement multiple window functions (Hann, Hamming, Blackman) selectable at runtime
 - [x] PI4 (expected): Implement the median filter
 - [ ] PI5 (advanced): Generalize all methods over numeric types using `num-traits`
 
