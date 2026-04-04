@@ -12,6 +12,7 @@ rfd = "0.17.2"
 symphonia = { version = "0.5.5", features = ["all"] }
 thiserror = "1.0"
 hound = "3.5"
+colorous = "1.0.16"
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

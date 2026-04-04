@@ -43,8 +43,8 @@ impl Spectrogram {
                 let bin = bin_f as usize;
                 let db = frame[bin.min(num_bins - 1)];
                 let normalized = ((db - min_db) / db_range).clamp(0.0, 1.0);
-                let v = (normalized * 255.0) as u8;
-                pixels[py * w + px] = egui::Color32::from_rgb(v, v, v);
+                let c = colorous::INFERNO.eval_continuous(normalized);
+                pixels[py * w + px] = egui::Color32::from_rgb(c.r, c.g, c.b);
             }
         }
 
