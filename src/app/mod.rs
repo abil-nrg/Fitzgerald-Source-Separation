@@ -42,6 +42,9 @@ impl eframe::App for SeparationApp {
                         self.options.fft_hop_size,
                     );
                     self.original = Some(original);
+                    self.harmonic = None;
+                    self.percussive = None;
+                    self.current_stream = None;
                 }
                 Err(e) => log::error!("can't load audio: {e}"),
             }
@@ -61,28 +64,6 @@ impl eframe::App for SeparationApp {
             ui.separator();
             if let Some(original) = &self.original {
                 ui.label(format!("Sample rate: {} Hz", original.data.sample_rate));
-                if ui.button("Play Original").clicked() {
-                    match fitzgerald_source_separation::audio::play_audio(&original.data) {
-                        Ok(stream) => self.current_stream = Some(stream),
-                        Err(e) => log::error!("playback failed: {e}"),
-                    }
-                }
-
-                if let (Some(harmonic), Some(percussive)) = (&self.harmonic, &self.percussive) {
-                    if ui.button("Play Harmonic").clicked() {
-                        match fitzgerald_source_separation::audio::play_audio(&harmonic.data) {
-                            Ok(stream) => self.current_stream = Some(stream),
-                            Err(e) => log::error!("playback failed: {e}"),
-                        }
-                    }
-
-                    if ui.button("Play Percussive").clicked() {
-                        match fitzgerald_source_separation::audio::play_audio(&percussive.data) {
-                            Ok(stream) => self.current_stream = Some(stream),
-                            Err(e) => log::error!("playback failed: {e}"),
-                        }
-                    }
-                }
 
                 if ui.button("Stop Audio").clicked() {
                     self.current_stream = None;
@@ -110,18 +91,36 @@ impl eframe::App for SeparationApp {
 
         if let Some(audio) = &self.original {
             egui::Window::new("Original Spectrogram").show(ctx, |ui| {
+                if ui.button("Play Original").clicked() {
+                    match fitzgerald_source_separation::audio::play_audio(&audio.data) {
+                        Ok(stream) => self.current_stream = Some(stream),
+                        Err(e) => log::error!("playback failed: {e}"),
+                    }
+                }
                 audio.spectrogram.ui(ui);
             });
         }
 
         if let Some(audio) = &self.harmonic {
             egui::Window::new("Harmonic Spectrogram").show(ctx, |ui| {
+                if ui.button("Play Harmonic").clicked() {
+                    match fitzgerald_source_separation::audio::play_audio(&audio.data) {
+                        Ok(stream) => self.current_stream = Some(stream),
+                        Err(e) => log::error!("playback failed: {e}"),
+                    }
+                }
                 audio.spectrogram.ui(ui);
             });
         }
 
         if let Some(audio) = &self.percussive {
             egui::Window::new("Percussive Spectrogram").show(ctx, |ui| {
+                if ui.button("Play Percussive").clicked() {
+                    match fitzgerald_source_separation::audio::play_audio(&audio.data) {
+                        Ok(stream) => self.current_stream = Some(stream),
+                        Err(e) => log::error!("playback failed: {e}"),
+                    }
+                }
                 audio.spectrogram.ui(ui);
             });
         }
