@@ -44,8 +44,16 @@ impl Audio {
         fft_hop_size: usize,
     ) -> Self {
         let spectrogram = Spectrogram::from_audio(ctx, &frames, fft_window_size);
-        let total_len = (frames.len() - 1) * fft_hop_size + fft_window_size;
-        let samples = stft::istft(&frames, fft_window_size, fft_hop_size, total_len, window);
+        let total_reconstructed = (frames.len() - 1) * fft_hop_size + fft_window_size;
+        let pad = fft_window_size / 2;
+        let samples = stft::istft(
+            &frames,
+            fft_window_size,
+            fft_hop_size,
+            total_reconstructed - fft_window_size,
+            window,
+            pad,
+        );
         let data = AudioData {
             samples,
             sample_rate,

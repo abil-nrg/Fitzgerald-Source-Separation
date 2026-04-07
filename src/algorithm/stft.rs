@@ -8,15 +8,20 @@ pub fn stft(
     hop_size: usize,
     window_fn: fn(usize) -> Vec<f64>,
 ) -> Vec<Vec<Complex<f64>>> {
+    let pad = window_size / 2;
+    let mut padded = vec![0.0f32; pad];
+    padded.extend_from_slice(signal);
+    padded.extend(vec![0.0f32; pad]);
+
     let window = window_fn(window_size);
     let fft_size = window_size.next_power_of_two();
     let mut frames = Vec::new();
 
     let mut start = 0;
-    while start + window_size <= signal.len() {
+    while start + window_size <= padded.len() {
         let mut frame = vec![Complex::new(0.0, 0.0); fft_size];
         for i in 0..window_size {
-            frame[i] = Complex::new(f64::from(signal[start + i]) * window[i], 0.0);
+            frame[i] = Complex::new(f64::from(padded[start + i]) * window[i], 0.0);
         }
 
         frames.push(fft(&frame));
@@ -32,6 +37,7 @@ pub fn istft(
     hop_size: usize,
     output_length: usize,
     window_fn: fn(usize) -> Vec<f64>,
+    offset: usize,
 ) -> Vec<f32> {
     let window = window_fn(window_size);
     let total_len = (frames.len() - 1) * hop_size + window_size;
@@ -56,6 +62,7 @@ pub fn istft(
 
     output
         .iter()
+        .skip(offset)
         .take(output_length)
         .map(|&s| s as f32)
         .collect()
@@ -73,7 +80,9 @@ mod tests {
         let window_size = 256;
         let hop_size = 128;
         let frames = stft(&signal, window_size, hop_size, super::super::hann_window);
-        let expected = (signal.len() - window_size) / hop_size + 1;
+
+        let padded_len = signal.len() + window_size;
+        let expected = (padded_len - window_size) / hop_size + 1;
         assert_eq!(frames.len(), expected);
     }
 
@@ -104,12 +113,12 @@ mod tests {
             hop_size,
             signal.len(),
             super::super::hann_window,
+            window_size / 2,
         );
 
         assert_eq!(reconstructed.len(), signal.len());
 
-        let margin = window_size;
-        for i in margin..signal.len() - margin {
+        for i in 0..signal.len() {
             assert!((reconstructed[i] - signal[i]).abs() < EPSILON);
         }
     }
@@ -118,7 +127,14 @@ mod tests {
     fn test_silence_roundtrip() {
         let signal = vec![0.0f32; 1024];
         let frames = stft(&signal, 256, 128, super::super::hann_window);
-        let reconstructed = istft(&frames, 256, 128, signal.len(), super::super::hann_window);
+        let reconstructed = istft(
+            &frames,
+            256,
+            128,
+            signal.len(),
+            super::super::hann_window,
+            128,
+        );
         for s in &reconstructed {
             assert!(s.abs() < EPSILON);
         }
