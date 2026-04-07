@@ -34,8 +34,13 @@ impl eframe::App for SeparationApp {
                         data.channels
                     );
 
-                    let original =
-                        Audio::from_audio_data(ctx, data, self.options.window_function.fun());
+                    let original = Audio::from_audio_data(
+                        ctx,
+                        data,
+                        self.options.window_function.fun(),
+                        self.options.fft_window_size,
+                        self.options.fft_hop_size,
+                    );
                     self.original = Some(original);
                 }
                 Err(e) => log::error!("can't load audio: {e}"),
@@ -48,6 +53,12 @@ impl eframe::App for SeparationApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Source Separation");
+            if self.original.is_none() {
+                ui.label("Change settings then load an audio file");
+            }
+            ui.separator();
+            self.options.ui(ui);
+            ui.separator();
             if let Some(original) = &self.original {
                 ui.label(format!("Sample rate: {} Hz", original.data.sample_rate));
                 if ui.button("Play Original").clicked() {
@@ -79,21 +90,19 @@ impl eframe::App for SeparationApp {
 
                 ui.separator();
 
-                self.options.ui(ui);
-
                 if ui.button("Separate!").clicked() {
                     let (harmonic, percussive) = original.separate(
                         ctx,
                         self.options.harmonic_kernel_size,
                         self.options.percussive_kernel_size,
                         self.options.window_function.fun(),
+                        self.options.fft_window_size,
+                        self.options.fft_hop_size,
                     );
                     self.harmonic = Some(harmonic);
                     self.percussive = Some(percussive);
                 }
             } else {
-                ui.label("Load an audio file");
-                ui.separator();
                 ui.label("For more information, see the GitHub Repository:");
                 ui.hyperlink("https://github.com/abil-nrg/Fitzgerald-Source-Separation");
             }

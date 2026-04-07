@@ -3,7 +3,7 @@ use num::Complex;
 
 use crate::{
     algorithm::{filter, stft},
-    app::spectrogram::{self, Spectrogram},
+    app::spectrogram::Spectrogram,
 };
 
 pub struct Audio {
@@ -17,19 +17,16 @@ impl Audio {
         ctx: &egui::Context,
         data: AudioData,
         window: fn(usize) -> Vec<f64>,
+        fft_window_size: usize,
+        fft_hop_size: usize,
     ) -> Self {
         let mono = if data.channels == 1 {
             data.samples.clone()
         } else {
             data.to_mono()
         };
-        let frames = stft::stft(
-            &mono,
-            spectrogram::WINDOW_SIZE,
-            spectrogram::HOP_SIZE,
-            window,
-        );
-        let spectrogram = Spectrogram::from_audio(ctx, &frames);
+        let frames = stft::stft(&mono, fft_window_size, fft_hop_size, window);
+        let spectrogram = Spectrogram::from_audio(ctx, &frames, fft_window_size);
         Self {
             data,
             spectrogram,
@@ -43,16 +40,12 @@ impl Audio {
         sample_rate: u32,
         channels: usize,
         window: fn(usize) -> Vec<f64>,
+        fft_window_size: usize,
+        fft_hop_size: usize,
     ) -> Self {
-        let spectrogram = Spectrogram::from_audio(ctx, &frames);
-        let total_len = (frames.len() - 1) * spectrogram::HOP_SIZE + spectrogram::WINDOW_SIZE;
-        let samples = stft::istft(
-            &frames,
-            spectrogram::WINDOW_SIZE,
-            spectrogram::HOP_SIZE,
-            total_len,
-            window,
-        );
+        let spectrogram = Spectrogram::from_audio(ctx, &frames, fft_window_size);
+        let total_len = (frames.len() - 1) * fft_hop_size + fft_window_size;
+        let samples = stft::istft(&frames, fft_window_size, fft_hop_size, total_len, window);
         let data = AudioData {
             samples,
             sample_rate,
@@ -71,6 +64,8 @@ impl Audio {
         harmonic_kernel_size: usize,
         percussive_kernel_size: usize,
         window: fn(usize) -> Vec<f64>,
+        fft_window_size: usize,
+        fft_hop_size: usize,
     ) -> (Self, Self) {
         let num_frames = self.frames.len();
         let num_bins = self.frames[0].len();
@@ -108,9 +103,24 @@ impl Audio {
             }
         }
 
-        let harmonic = Self::from_frames(ctx, harmonic_frames, self.data.sample_rate, 1, window);
-        let percussive =
-            Self::from_frames(ctx, percussive_frames, self.data.sample_rate, 1, window);
+        let harmonic = Self::from_frames(
+            ctx,
+            harmonic_frames,
+            self.data.sample_rate,
+            1,
+            window,
+            fft_window_size,
+            fft_hop_size,
+        );
+        let percussive = Self::from_frames(
+            ctx,
+            percussive_frames,
+            self.data.sample_rate,
+            1,
+            window,
+            fft_window_size,
+            fft_hop_size,
+        );
         (harmonic, percussive)
     }
 }

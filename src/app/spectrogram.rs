@@ -1,7 +1,5 @@
 use num::Complex;
 
-pub const WINDOW_SIZE: usize = 1024 * 2;
-pub const HOP_SIZE: usize = 512 * 2;
 pub const SPECTROGRAM_HEIGHT: usize = 1024;
 pub const MAX_TEXTURE_WIDTH: usize = 8192;
 
@@ -10,8 +8,12 @@ pub struct Spectrogram {
 }
 
 impl Spectrogram {
-    pub fn from_audio(ctx: &egui::Context, frames: &[Vec<Complex<f64>>]) -> Self {
-        let num_bins = WINDOW_SIZE / 2 + 1;
+    pub fn from_audio(
+        ctx: &egui::Context,
+        frames: &[Vec<Complex<f64>>],
+        window_size: usize,
+    ) -> Self {
+        let num_bins = window_size / 2 + 1;
         let num_frames = frames.len();
 
         let db_matrix: Vec<Vec<f64>> = frames
