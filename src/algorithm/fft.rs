@@ -59,7 +59,7 @@ pub fn ifft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
 mod tests {
     use super::*;
 
-    const EPSILON: f64 = 0.00000001;
+    const EPSILON: f64 = 0.000_000_01;
     #[test]
     fn test_fft() {
         let input = [

@@ -8,6 +8,8 @@ Rust is used for the algorithm and GUI.
 
 ## Getting Started
 
+Try it online: https://ss.sampeets.ca
+
 The WASM/Native interoperability is based on the implementation in [eframe_template](https://github.com/emilk/eframe_template/).
 
 To run the native application:
@@ -137,7 +139,7 @@ Objective 2: Target WebAssembly and deploy the application as a public website
 - [x] PI2 (basic): Compile and run the egui application in a web browser via WebAssembly with basic functionality intact
 - [x] PI3 (expected): Implement browser-compatible audio loading (look at `rfd`)
 - [x] PI4 (expected): Implement browser-compatible audio playback (look at `cpal`)
-- [ ] PI5 (advanced): Deploy the WASM application as a publicly hosted website
+- [x] PI5 (advanced): Deploy the WASM application as a publicly hosted website
 
 ----
 
@@ -159,6 +161,6 @@ Objective 2: Target WebAssembly and deploy the application as a public website
 
 [8] P. Stone, et al., "num-traits: Numeric traits for Rust," 2024. [Online]. Available: [https://github.com/rust-num/num-traits](https://github.com/rust-num/num-traits)
 
-[9] N. Ono, K. Miyamoto, J. Le Roux, H. Kameoka, and S. Sagayama, “Separation of a monaural audio signal into harmonic/percussive components by complemen- tary diffusion on spectrogram,” in 2008 16th European Signal Processing Conference, 2008, pp. 1–4.
+[9] N. Ono, K. Miyamoto, J. Le Roux, H. Kameoka, and S. Sagayama, “Separation of a monaural audio signal into harmonic/percussive components by complementary diffusion on spectrogram,” in 2008 16th European Signal Processing Conference, 2008, pp. 1–4.
 
-[10] S. Araki, N. Ito, R. Haeb-Umbach, G. Wichern, Z.-Q. Wang, and Y. Mitsufuji, “30+ years of source separa- tion research: Achievements and future challenges,” in ICASSP 2025 - 2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2025, pp. 1–5.
+[10] S. Araki, N. Ito, R. Haeb-Umbach, G. Wichern, Z.-Q. Wang, and Y. Mitsufuji, “30+ years of source separation research: Achievements and future challenges,” in ICASSP 2025 - 2025 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), 2025, pp. 1–5.
