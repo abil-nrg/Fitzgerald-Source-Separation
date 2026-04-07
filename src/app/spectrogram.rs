@@ -3,6 +3,7 @@ use num::Complex;
 pub const WINDOW_SIZE: usize = 1024 * 2;
 pub const HOP_SIZE: usize = 512 * 2;
 pub const SPECTROGRAM_HEIGHT: usize = 1024;
+pub const MAX_TEXTURE_WIDTH: usize = 8192;
 
 pub struct Spectrogram {
     texture: egui::TextureHandle,
@@ -32,17 +33,27 @@ impl Spectrogram {
         let min_db = max_db - 80.0;
         let db_range = max_db - min_db;
 
-        let w = num_frames;
+        let w = num_frames.min(MAX_TEXTURE_WIDTH);
         let h = SPECTROGRAM_HEIGHT;
         let mut pixels = vec![egui::Color32::BLACK; w * h];
 
         for px in 0..w {
-            let frame = &db_matrix[px];
+            // average over frames in the spectrogram instead
+            let frame_start = px * num_frames / w;
+            let frame_end = ((px + 1) * num_frames / w)
+                .max(frame_start + 1)
+                .min(num_frames);
+            let count = (frame_end - frame_start) as f64;
+
             for py in 0..h {
                 let bin_f = (1.0 - py as f64 / h as f64) * (num_bins - 1) as f64;
                 let bin = bin_f as usize;
-                let db = frame[bin.min(num_bins - 1)];
-                let normalized = ((db - min_db) / db_range).clamp(0.0, 1.0);
+                let db_avg = db_matrix[frame_start..frame_end]
+                    .iter()
+                    .map(|frame| frame[bin.min(num_bins - 1)])
+                    .sum::<f64>()
+                    / count;
+                let normalized = ((db_avg - min_db) / db_range).clamp(0.0, 1.0);
                 let c = colorous::INFERNO.eval_continuous(normalized);
                 pixels[py * w + px] = egui::Color32::from_rgb(c.r, c.g, c.b);
             }
