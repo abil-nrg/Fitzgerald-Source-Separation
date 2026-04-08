@@ -1,36 +1,58 @@
 use num::Complex;
-use rustfft::FftPlanner;
-use std::sync::Arc;
 
-/// Computes the forward FFT using the rustfft library.
+// Cooley-Tukey decimation-in-time FFT
+// adapted from the implementation on Wikipedia: https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm
 pub fn fft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
-    let n = input.len();
-    let mut buffer = input.to_vec();
-    
-    let mut planner = FftPlanner::new();
-    let fft = planner.plan_fft_forward(n);
-    fft.process(&mut buffer);
-    
-    buffer
+    assert!(
+        input.len().is_power_of_two(),
+        "fft input length must be a power of 2"
+    );
+    if input.len() == 1 {
+        vec![input[0]]
+    } else {
+        let even = input
+            .iter()
+            .step_by(2)
+            .copied()
+            .collect::<Vec<Complex<f64>>>();
+
+        let odd = input[1..]
+            .iter()
+            .step_by(2)
+            .copied()
+            .collect::<Vec<Complex<f64>>>();
+
+        let even = fft(&even);
+        let odd = fft(&odd);
+
+        let n = input.len();
+        let (low, high): (Vec<Complex<f64>>, Vec<Complex<f64>>) = even
+            .iter()
+            .zip(odd.iter())
+            .enumerate()
+            .map(|(k, (e, o))| {
+                let t = Complex::new(0.0, -2.0 * std::f64::consts::PI * k as f64 / n as f64).exp();
+                (e + t * o, e - t * o)
+            })
+            .unzip();
+
+        low.into_iter().chain(high).collect()
+    }
 }
 
-/// Computes the inverse FFT using the rustfft library.
+// implementation based on https://www.embedded.com/dsp-tricks-computing-inverse-ffts-using-the-forward-fft/
 pub fn ifft(input: &[Complex<f64>]) -> Vec<Complex<f64>> {
+    assert!(
+        input.len().is_power_of_two(),
+        "ifft input length must be a power of 2"
+    );
     let n = input.len();
-    let mut buffer = input.to_vec();
-    
-    let mut planner = FftPlanner::new();
-    let fft = planner.plan_fft_inverse(n);
-    fft.process(&mut buffer);
-
-    // rustfft does not normalize the inverse transform automatically.
-    // We must divide by N to complete the roundtrip.
-    let n_f64 = n as f64;
-    for x in &mut buffer {
-        *x /= n_f64;
+    let conjugated: Vec<Complex<f64>> = input.iter().map(num::Complex::conj).collect();
+    let mut output = fft(&conjugated);
+    for x in &mut output {
+        *x = x.conj() / n as f64;
     }
-    
-    buffer
+    output
 }
 
 #[cfg(test)]
