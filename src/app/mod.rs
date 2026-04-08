@@ -21,7 +21,38 @@ impl SeparationApp {
     pub fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         Self::default()
     }
-    
+    fn ui_waveform(&self, ui: &mut egui::Ui, audio_data: &fitzgerald_source_separation::audio::AudioData){
+        let desired_size = egui::vec2(ui.available_width(), 80.0);
+        let (rect, _response) = ui.allocate_at_least(desired_size, egui::Sense::hover());
+        
+        let painter = ui.painter_at(rect);
+        painter.rect_filled(rect,2.0,ui.visuals().extreme_bg_color);
+
+        let mono = audio_data.to_mono();
+        let middle_y = rect.center().y;
+        let width = rect.width();
+        let height = rect.height();
+
+        let step = (mono.len() as f32/width).max(1.0) as usize;
+
+        let points: Vec<egui::Pos2> = mono
+            .iter()
+            .step_by(step)
+            .enumerate()
+            .map(|(x,&sample)| {
+                let x_pos = rect.left() + x as f32;
+                let y_offset = sample*(height/2.0)*0.9;
+                egui::pos2(x_pos, middle_y-y_offset)
+            })
+            .collect();
+        
+        if points.len() > 1 {
+            painter.add(egui::Shape::line(
+                points,
+                egui::Stroke::new(1.0, ui.visuals().widgets.active.fg_stroke.color),
+            ));
+        }
+    }
 }
 
 impl eframe::App for SeparationApp {
@@ -90,68 +121,76 @@ impl eframe::App for SeparationApp {
             }
         });
 
-        if let Some(audio) = &self.original {
-            egui::Window::new("Original Spectrogram").show(ctx, |ui| {
-                if ui.button("Play Original").clicked() {
-                    match fitzgerald_source_separation::audio::play_audio(&audio.data) {
-                        Ok(stream) => self.current_stream = Some(stream),
-                        Err(e) => log::error!("playback failed: {e}"),
-                    }
-                }
-                audio.spectrogram.ui(ui);
-            });
-        }
 
-        if let Some(audio) = &self.harmonic {
-            egui::Window::new("Harmonic Spectrogram").show(ctx, |ui| {
-                ui.horizontal( |ui| {
-                    if ui.button("Play Harmonic").clicked() {
+        if self.original.is_some() {
+            egui::Window::new("Original").show(ctx, |ui| {
+                let audio = self.original.as_ref().unwrap();
+                ui.horizontal(|ui| {
+                    if ui.button("Play").clicked() {
                         match fitzgerald_source_separation::audio::play_audio(&audio.data) {
                             Ok(stream) => self.current_stream = Some(stream),
                             Err(e) => log::error!("playback failed: {e}"),
                         }
                     }
-
-                    if ui.button("Save Audio").clicked() {
-                        if let Some(path) = rfd::FileDialog::new()
-                            .add_filter("WAV Audio", &["wav"])
-                            .set_file_name("harmonic.wav")
-                            .save_file()
-                        {
-                            let path_str = path.to_string_lossy().to_string();
-                            if let Err(e) = fitzgerald_source_separation::audio::save_wav(&path_str, &audio.data){
-                                log::error!("Failed to save harmonic audio: {e}");
-                            }
-                        }
-                    }
-            });
+                });
+                ui.label("Waveform:");
+                self.ui_waveform(ui, &audio.data);
+                ui.separator();
+                ui.label("Spectrogram:");
                 audio.spectrogram.ui(ui);
             });
         }
 
-        if let Some(audio) = &self.percussive {
-            egui::Window::new("Percussive Spectrogram").show(ctx, |ui| {
-                ui.horizontal( |ui| {
-                    if ui.button("Play Percussive").clicked() {
-                    match fitzgerald_source_separation::audio::play_audio(&audio.data) {
-                        Ok(stream) => self.current_stream = Some(stream),
-                        Err(e) => log::error!("playback failed: {e}"),
-                    }
-                }
-
-                    if ui.button("Save Audio").clicked() {
-                        if let Some(path) = rfd::FileDialog::new()
-                            .add_filter("WAV Audio", &["wav"])
-                            .set_file_name("percussive.wav")
-                            .save_file()
-                        {
-                            let path_str = path.to_string_lossy().to_string();
-                            if let Err(e) = fitzgerald_source_separation::audio::save_wav(&path_str, &audio.data){
-                                log::error!("Failed to save percussive audio: {e}");
-                            }
+        if self.harmonic.is_some() {
+            egui::Window::new("Harmonic").show(ctx, |ui| {
+                let audio = self.harmonic.as_ref().unwrap();
+                ui.horizontal(|ui| {
+                    if ui.button("Play").clicked() {
+                        match fitzgerald_source_separation::audio::play_audio(&audio.data) {
+                            Ok(stream) => self.current_stream = Some(stream),
+                            Err(e) => log::error!("playback failed: {e}"),
                         }
                     }
+                    if ui.button("Save WAV").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().save_file() {
+                            let _ = fitzgerald_source_separation::audio::save_wav(
+                                &path.to_string_lossy(), 
+                                &audio.data
+                            );
+                        }
+                    }
+                });
+                ui.label("Waveform:");
+                self.ui_waveform(ui, &audio.data);
+                ui.separator();
+                ui.label("Spectrogram:");
+                audio.spectrogram.ui(ui);
             });
+        }
+
+        if self.percussive.is_some() {
+            egui::Window::new("Percussive").show(ctx, |ui| {
+                let audio = self.percussive.as_ref().unwrap();
+                ui.horizontal(|ui| {
+                    if ui.button("Play").clicked() {
+                        match fitzgerald_source_separation::audio::play_audio(&audio.data) {
+                            Ok(stream) => self.current_stream = Some(stream),
+                            Err(e) => log::error!("playback failed: {e}"),
+                        }
+                    }
+                    if ui.button("Save WAV").clicked() {
+                        if let Some(path) = rfd::FileDialog::new().save_file() {
+                            let _ = fitzgerald_source_separation::audio::save_wav(
+                                &path.to_string_lossy(), 
+                                &audio.data
+                            );
+                        }
+                    }
+                });
+                ui.label("Waveform:");
+                self.ui_waveform(ui, &audio.data);
+                ui.separator();
+                ui.label("Spectrogram:");
                 audio.spectrogram.ui(ui);
             });
         }
