@@ -74,4 +74,5 @@ impl Spectrogram {
             .maintain_aspect_ratio(false);
         ui.add(image);
     }
+
 }

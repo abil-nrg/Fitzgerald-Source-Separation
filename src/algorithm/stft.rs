@@ -68,6 +68,45 @@ pub fn istft(
         .collect()
 }
 
+pub fn process_in_blocks(
+    signal: &[f32],
+    block_size: usize, // e.g., 44100 * 10 (10 seconds)
+    hop_size: usize,
+    process_fn: impl Fn(&[f32]) -> Vec<f32>,
+) -> Vec<f32> {
+    let mut final_output = vec![0.0; signal.len()];
+    let mut window_sum = vec![0.0; signal.len()];
+
+    // We use a Hann window for the blocks to cross-fade them
+    let block_window = crate::algorithm::hann_window(block_size);
+
+    let mut start = 0;
+    while start + block_size <= signal.len() {
+        let chunk = &signal[start..start + block_size];
+        
+        // Process this 10-second chunk (Harmonic/Percussive separation)
+        let processed_chunk = process_fn(chunk);
+
+        for i in 0..block_size {
+            let idx = start + i;
+            let w = block_window[i] as f32;
+            final_output[idx] += processed_chunk[i] * w;
+            window_sum[idx] += w;
+        }
+
+        start += block_size / 2; // 50% Overlap
+    }
+
+    // Normalize by the window sum to ensure unity gain
+    for i in 0..final_output.len() {
+        if window_sum[i] > 1e-8 {
+            final_output[i] /= window_sum[i];
+        }
+    }
+
+    final_output
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
